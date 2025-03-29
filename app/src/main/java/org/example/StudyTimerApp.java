@@ -14,6 +14,11 @@ public class StudyTimerApp {
             frame.setSize(400, 200);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setResizable(false);
+            frame.setTitle("Study Timer");
+
+            StudyTimer studyTimer = new StudyTimer();
+
+            frame.add(studyTimer);
 
             frame.setVisible(true);
         });

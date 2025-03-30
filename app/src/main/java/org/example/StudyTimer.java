@@ -135,6 +135,6 @@ public class StudyTimer extends JPanel{
     }
 
     private void exportTime() {
-
+        ExcelExporter.exportSeconds(seconds);
     }
 }

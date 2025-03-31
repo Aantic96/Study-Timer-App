@@ -13,9 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelExporter {
 
-    private static final String FILE_PATH = "StudyTimeLog.xlsx";
-
-    public static void exportSeconds(int totalSeconds) {
+    public static void exportSeconds(int totalSeconds, String FILE_PATH) {
         try {
             File file = new File(FILE_PATH);
             XSSFWorkbook workbook;

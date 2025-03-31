@@ -2,28 +2,19 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 import java.io.File;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExcelExporterTest {
 
     @Test
-    void testFileCreation() {
-        File file = new File("StudyTimeLog.xlsx");
-        if (file.exists()) {
-            file.delete(); 
-        }
+    void testExportSeconds() {
+        String testFilePath = "TestStudyLog.xlsx";
 
-        ExcelExporter.exportSeconds(3600);
+        ExcelExporter.exportSeconds(3661, testFilePath);
 
-        assertTrue(file.exists(), "Excel file should be created after exporting.");
-    }
+        File file = new File(testFilePath);
+        assertTrue(file.exists());
 
-    @Test
-    void testLogStudySession() {
-        ExcelExporter.exportSeconds(3600);
-        ExcelExporter.exportSeconds(1800);
-
-        File file = new File("StudyTimeLog.xlsx");
-        assertTrue(file.exists(), "Excel file should exist.");
+        file.delete();
     }
 }

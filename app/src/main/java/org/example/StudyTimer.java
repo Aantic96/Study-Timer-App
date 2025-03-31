@@ -18,6 +18,8 @@ import javax.swing.SwingUtilities;
 
 public class StudyTimer extends JPanel{
 
+    private static final String FILE_PATH = "StudyTimeLog.xlsx";
+
     private int seconds = 0;
     private Timer timer;
     private JLabel timeLabel;
@@ -143,6 +145,6 @@ public class StudyTimer extends JPanel{
     }
 
     private void exportTime() {
-        ExcelExporter.exportSeconds(seconds);
+        ExcelExporter.exportSeconds(seconds, FILE_PATH);
     }
 }

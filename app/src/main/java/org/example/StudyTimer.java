@@ -65,6 +65,60 @@ public class StudyTimer extends JPanel{
         exportButton.addActionListener(e -> exportTime());
     }
 
+    public boolean isRunning() {
+        return isRunning;
+    }
+    
+    public String getFormattedTime() {
+        return formatTime(seconds);
+    }
+
+    protected String formatTime(int seconds) {
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int secs = seconds % 60;
+
+        return String.format("Time: %02d:%02d:%02d", hours, minutes, secs);
+    }
+
+    protected void startTimer() {
+        if(!isRunning) {
+            isRunning = true;
+            timer = new Timer();
+            timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        seconds++;
+                        SwingUtilities.invokeLater(() -> timeLabel.setText(formatTime(seconds)));
+                    }
+
+                }, 1000, 1000
+            );
+        }
+    }
+
+    protected void pauseTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+            isRunning = false;
+        }
+    }
+
+    protected void resetTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
+
+        isRunning = false;
+
+        seconds = 0;
+        timeLabel.setText("Time: 00:00:00");
+        timer = new Timer();
+    }
+
     private void styleTextTimer(JLabel timeLabel) {
         timeLabel.setForeground(Color.decode("#fece09"));
         timeLabel.setFont(new Font("Arial", Font.BOLD, 30));
@@ -86,52 +140,6 @@ public class StudyTimer extends JPanel{
     private void styleExportButton(JButton exportButton) {
         exportButton.setForeground(Color.decode("#fece09"));
         exportButton.setBackground(Color.decode("#242321"));
-    }
-
-    private String formatTime() {
-        int hours = seconds / 3600;
-        int minutes = (seconds % 3600) / 60;
-        int secs = seconds % 60;
-
-        return String.format("Time: %02d:%02d:%02d", hours, minutes, secs);
-    }
-
-    private void startTimer() {
-        if(!isRunning) {
-            isRunning = true;
-            timer = new Timer();
-            timer.scheduleAtFixedRate(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        seconds++;
-                        SwingUtilities.invokeLater(() -> timeLabel.setText(formatTime()));
-                    }
-
-                }, 1000, 1000
-            );
-        }
-    }
-
-    private void pauseTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-            isRunning = false;
-        }
-    }
-
-    private void resetTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer.purge();
-        }
-
-        isRunning = false;
-
-        seconds = 0;
-        timeLabel.setText("Time: 00:00:00");
-        timer = new Timer();
     }
 
     private void exportTime() {

@@ -5,21 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelExporter {
-    
+
     private static final String FILE_PATH = "StudyTimeLog.xlsx";
 
     public static void exportSeconds(int totalSeconds) {
         try {
             File file = new File(FILE_PATH);
-
             XSSFWorkbook workbook;
             XSSFSheet sheet;
 
@@ -28,8 +26,9 @@ public class ExcelExporter {
 
             String currentDate = dateFormat.format(new Date());
             String currentMonth = monthFormat.format(new Date());
+            String totalTimeString = "";
 
-            if(file.exists()) {
+            if (file.exists()) {
                 FileInputStream fis = new FileInputStream(file);
                 workbook = new XSSFWorkbook(fis);
                 sheet = workbook.getSheet(currentMonth);
@@ -54,28 +53,38 @@ public class ExcelExporter {
             double excelTimeValue = totalSeconds / 86400.0;
             timeCell.setCellValue(excelTimeValue);
 
-            Cell sumCell = row.createCell(2);
-            String sumFormula = "SUM(B2:B" + (rowNumber + 1) + ")";
-            sumCell.setCellFormula(sumFormula);
-
+            row.createCell(2);
 
             CellStyle timeStyle = sheet.getWorkbook().createCellStyle();
             timeStyle.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("hh:mm:ss"));
             timeCell.setCellStyle(timeStyle);
 
-            CellStyle sumStyle = sheet.getWorkbook().createCellStyle();
-            sumStyle.setDataFormat(sheet.getWorkbook().createDataFormat().getFormat("[d]:hh:mm:ss"));
-            sumCell.setCellStyle(sumStyle);
+            row.getCell(2).setCellStyle(timeStyle);
+
+            if (rowNumber >= 1) {
+                double totalTime = 0.0;
+                for (int i = 1; i <= rowNumber; i++) {
+                    Row r = sheet.getRow(i);
+                    totalTime += r.getCell(1).getNumericCellValue();
+                }
+
+                Row totalRow = sheet.getRow(1); 
+                if (totalRow == null) {
+                    totalRow = sheet.createRow(1);
+                }
+                Cell totalTimeCell = totalRow.createCell(3);                
+
+                totalTimeString = convertTotalTimeToStr(totalTime * 86400.0);
+                totalTimeCell.setCellValue(totalTimeString);
+            }
 
             FileOutputStream fos = new FileOutputStream(FILE_PATH);
-                workbook.write(fos);
-                fos.close();
-                workbook.close();
+            workbook.write(fos);
+            fos.close();
+            workbook.close();
 
-            System.out.println("Study session logged successfully!");  
-        }
-
-        catch(Exception e) {
+            System.out.println("Study session logged successfully!");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -84,13 +93,18 @@ public class ExcelExporter {
         Row headerRow = sheet.createRow(0);
         headerRow.createCell(0).setCellValue("Study Date");
         headerRow.createCell(1).setCellValue("Time Spent (hh:mm:ss)");
-        headerRow.createCell(2).setCellValue("Total Time Sum (days:hh:mm:ss)");
+        headerRow.createCell(2);
+        headerRow.createCell(3).setCellValue("Total Time");
     }
 
-    private static String formatTimeForExcel(int totalSeconds) {
-        int hours = totalSeconds / 3600;
-        int minutes = (totalSeconds % 3600) / 60;
-        int secs = totalSeconds % 60;
-        return String.format("%02d:%02d:%02d", hours, minutes, secs);
+    private static String convertTotalTimeToStr(double totalTime) {
+        long secondsTotal = Math.round(totalTime);
+
+        int day = (int)TimeUnit.SECONDS.toDays(secondsTotal);        
+        long hours = TimeUnit.SECONDS.toHours(secondsTotal) - (day *24);
+        long minute = TimeUnit.SECONDS.toMinutes(secondsTotal) - (TimeUnit.SECONDS.toHours(secondsTotal)* 60);
+        long second = TimeUnit.SECONDS.toSeconds(secondsTotal) - (TimeUnit.SECONDS.toMinutes(secondsTotal) *60);
+
+        return "Days: " + day + " Hours: " + hours + " Minutes: " + minute + " Seconds: " + second;
     }
 }
